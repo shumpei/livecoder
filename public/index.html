@@ -28,24 +28,8 @@
   editor.getSession().setMode("ace/mode/javascript");
 
   var socket = io();
-
-  var clientId = Math.floor(Math.random() * 10000);
-  var valueSet = false;
-
-  editor.getSession().on('change', function(e) {
-    console.log(e);
-    if (valueSet) {
-      valueSet = false;
-      return;
-    }
-    var text = editor.getValue();
-    socket.emit('codechange', { clientId: clientId, text: text });
-  });
   socket.on('codechange', function(data) {
-    if (data.clientId != clientId && editor.getValue() != data.text) {
-      editor.setValue(data.text);
-      valueSet = true;
-    }
+    editor.setValue(data.content);
   });
   </script>
 </body>
