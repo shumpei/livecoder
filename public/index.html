@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>ACE in Action</title>
+  <style type="text/css" media="screen">
+  #editor {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+  </style>
+</head>
+<body>
+
+  <div id="editor">function foo(items) {
+    var x = "All this is syntax highlighted";
+    return x;
+  }</div>
+
+  <script src="/ace-builds-master/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/monokai");
+  editor.getSession().setMode("ace/mode/javascript");
+
+  var socket = io();
+
+  var clientId = Math.floor(Math.random() * 10000);
+  var valueSet = false;
+
+  editor.getSession().on('change', function(e) {
+    console.log(e);
+    if (valueSet) {
+      valueSet = false;
+      return;
+    }
+    var text = editor.getValue();
+    socket.emit('codechange', { clientId: clientId, text: text });
+  });
+  socket.on('codechange', function(data) {
+    if (data.clientId != clientId && editor.getValue() != data.text) {
+      editor.setValue(data.text);
+      valueSet = true;
+    }
+  });
+  </script>
+</body>
+</html>
